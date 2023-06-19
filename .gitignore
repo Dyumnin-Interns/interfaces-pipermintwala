@@ -1,4 +1,5 @@
 *~
-#ignoring the vcd and thsim build files
+#ignoring the vcd and the sim build files
 dut.vcd
-./tests/sim_build
+tests/sim_build
+tests/__pycache__

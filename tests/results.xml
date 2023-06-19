@@ -1,6 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1687155785" />
-    <testcase name="test_dut" classname="dut_test" file="/home/sati/Documents/verlog/interfaces-pipermintwala/tests/dut_test.py" lineno="8" time="0.003880739212036133" sim_time_ns="60.001" ratio_time="15461.229606438532" />
-  </testsuite>
-</testsuites>
