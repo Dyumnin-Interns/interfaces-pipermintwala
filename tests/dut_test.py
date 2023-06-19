@@ -33,12 +33,12 @@ async def test_dut(dut):
     dut.len_en.value = 1
     dut.len_value.value = 4  # Accumulate 4 bytes
     # inDrv = DUTDriver(dut, dut.CLK)
-
-    inDrv2 = InputDriver(dut, "din", dut.CLK)
+    lenDrv = InputDriver(dut, "len", dut.CLK)
+    inDrv = InputDriver(dut, "din", dut.CLK)
     OutputDriver(dut, "dout", dut.CLK, sb_fn)
-
+    await lenDrv._driver_send(4)
     for i in range(4):
-        await inDrv2._driver_send(i + 1)
+        await inDrv._driver_send(i + 1)
 
 
 class OutputDriver(BusDriver):
