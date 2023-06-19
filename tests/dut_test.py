@@ -28,11 +28,11 @@ async def test_dut(dut):
     # Testing from the len port
     dut.len_en.value = 1
     dut.len_value.value = 4  # Accumulate 4 bytes
-    # inDrv = DUTDriver(dut, dut.CLK)
-    inDrv2 = InputDriver(dut, "data_in", dut.CLK)
+    inDrv = DUTDriver(dut, dut.CLK)
+    # inDrv2 = InputDriver(dut, "data_in", dut.CLK)
 
     for i in range(4):
-        inDrv2.append(i + 1)
+        await inDrv.send_data(i + 1)
 
     await NextTimeStep()
     dut.dout_rdy == 1, "Data output not ready after accumulation"
