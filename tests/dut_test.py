@@ -29,9 +29,6 @@ async def test_dut(dut):
     await RisingEdge(dut.CLK)
     dut.RST_N.value = 1
 
-    # Testing from the len port
-    dut.len_en.value = 1
-    dut.len_value.value = 4  # Accumulate 4 bytes
     # inDrv = DUTDriver(dut, dut.CLK)
     lenDrv = InputDriver(dut, "len", dut.CLK)
     inDrv = InputDriver(dut, "din", dut.CLK)
