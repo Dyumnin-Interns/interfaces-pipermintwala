@@ -3,3 +3,4 @@
 dut.vcd
 tests/sim_build
 tests/__pycache__
+results.xml
