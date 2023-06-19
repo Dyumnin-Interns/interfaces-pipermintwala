@@ -196,7 +196,7 @@ module dut(
 	     cfg_en && cfg_op && cfg_address == 8'd8 && sw_override ;
 
   // register sum
-  assign $sumD_IN = sum + din_value ;
+  assign sum$D_IN = sum + din_value ;
   assign sum$EN = din_en && !current_count_PLUS_1_EQ_programmed_length___d8 ;
 
   // register sw_override

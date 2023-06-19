@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1687196102" />
-    <testcase name="test_dut" classname="dut_test" file="/home/sati/Documents/verlog/interfaces-pipermintwala/tests/dut_test.py" lineno="12" time="0.0033304691314697266" sim_time_ns="100.001" ratio_time="30026.100243682442" />
+    <property name="random_seed" value="1687196292" />
+    <testcase name="test_dut" classname="dut_test" file="/home/sati/Documents/verlog/interfaces-pipermintwala/tests/dut_test.py" lineno="12" time="0.003596782684326172" sim_time_ns="100.001" ratio_time="27802.902976534537" />
   </testsuite>
 </testsuites>
