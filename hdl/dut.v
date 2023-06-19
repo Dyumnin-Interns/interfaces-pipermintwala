@@ -42,7 +42,8 @@
   `define BSV_RESET_EDGE negedge
 `endif
 
-module dut(CLK,
+module dut(
+     CLK,
 	   RST_N,
 
 	   din_value,

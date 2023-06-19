@@ -1,1 +1,4 @@
 *~
+#ignoring the vcd and thsim build files
+dut.vcd
+./tests/sim_build
