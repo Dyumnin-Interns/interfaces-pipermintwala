@@ -1,8 +1,8 @@
 from typing import Any, Optional
 import cocotb
-from cocotb.handle import SimHandleBase
 from cocotb.triggers import RisingEdge, Timer, NextTimeStep, ReadOnly
 from cocotb_bus.drivers import BusDriver
+import random
 
 
 @cocotb.test()
@@ -31,34 +31,33 @@ async def test_dut(dut):
     inDrv = DUTDriver(dut, dut.CLK)
     # inDrv2 = InputDriver(dut, "data_in", dut.CLK)
 
+    await Timer(10, "ns")
+
     for i in range(4):
         await inDrv.send_data(i + 1)
 
-    await NextTimeStep()
     dut.dout_rdy == 1, "Data output not ready after accumulation"
     assert dut.dout_value == 10, "Incorrect accumulated value"
 
 
-class InputDriver(BusDriver):
-    _signals = [
-        "din_rdy",
-        "din_en",
-        "din_data",
-    ]
+# class InputDriver(BusDriver):
+#     _signals = ["din_rdy", "din_en", "din_value"]
 
-    def __init__(self, dut, name, clk):
-        BusDriver.__init__(self, dut, name, clk)
-        self.bus.din_en = 0
-        self.clk = clk
+#     def __init__(self, dut, name, clk):
+#         BusDriver.__init__(self, dut, name, clk)
+#         self.bus.din_en = 0
+#         self.clk = clk
 
-    async def _driver_send(self, value, sync: bool = True):
-        if self.bus.din_rdy.value != 1:
-            await RisingEdge(self.bus.din_rdy)
-        self.bus.din_en.value = 1
-        self.bus.din_data.value = value
-        await ReadOnly()
-        self.bus.din_en.value = 0
-        await NextTimeStep()
+#     async def _driver_send(self, value, sync=True):
+#         await RisingEdge(self.clk)
+#         if self.bus.din_rdy != 1:
+#             await RisingEdge(self.bus.din_rdy)
+#         self.bus.din_en.value = 1
+#         self.bus.din_value = value
+#         await ReadOnly()
+#         await RisingEdge(self.clk)
+#         self.bus.din_en.value = 0
+#         await NextTimeStep()
 
 
 class DUTDriver:
@@ -70,7 +69,9 @@ class DUTDriver:
         while not int(self.dut.din_rdy):
             await RisingEdge(self.clock)
             await ReadOnly()
-        self.dut.din_value.value = value
         self.dut.din_en.value = 1
+        self.dut.din_value.value = value
+        await ReadOnly()
         await RisingEdge(self.clock)
         self.dut.din_en.value = 0
+        await NextTimeStep()
