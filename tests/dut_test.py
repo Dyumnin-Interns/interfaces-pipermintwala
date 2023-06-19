@@ -2,7 +2,11 @@ from typing import Any, Optional
 import cocotb
 from cocotb.triggers import RisingEdge, Timer, NextTimeStep, ReadOnly
 from cocotb_bus.drivers import BusDriver
-import random
+from cocotb.result import TestError
+
+
+def sb_fn(actual_value):
+    assert actual_value == 10, "Scoreboard Matching Failed"
 
 
 @cocotb.test()
@@ -29,6 +33,7 @@ async def test_dut(dut):
     dut.len_en.value = 1
     dut.len_value.value = 4  # Accumulate 4 bytes
     inDrv = DUTDriver(dut, dut.CLK)
+    OutputDriver(dut, "dout", dut.CLK, sb_fn)
     # inDrv2 = InputDriver(dut, "data_in", dut.CLK)
 
     await Timer(10, "ns")
@@ -36,8 +41,46 @@ async def test_dut(dut):
     for i in range(4):
         await inDrv.send_data(i + 1)
 
-    dut.dout_rdy == 1, "Data output not ready after accumulation"
-    assert dut.dout_value == 10, "Incorrect accumulated value"
+
+class DUTDriver:
+    def __init__(self, dut, clock):
+        self.dut = dut
+        self.clock = clock
+
+    async def send_data(self, value):
+        while not int(self.dut.din_rdy):
+            await RisingEdge(self.clock)
+            await ReadOnly()
+        self.dut.din_en.value = 1
+        self.dut.din_value.value = value
+        await ReadOnly()
+        await RisingEdge(self.clock)
+        self.dut.din_en.value = 0
+        await NextTimeStep()
+
+
+class OutputDriver(BusDriver):
+    _signals = ["rdy", "en", "value"]
+
+    def __init__(self, dut, name, clk, sb_callback):
+        BusDriver.__init__(self, dut, name, clk)
+        self.bus.en.value = 0
+        self.clk = clk
+        self.callback = sb_callback
+        self.append(0)
+
+    async def _driver_send(self, value, sync=True):
+        await Timer(20, "ns")
+        while True:
+            if self.bus.rdy.value != 1:
+                await RisingEdge(self.bus.rdy)
+            self.bus.en.value = 1
+            await ReadOnly()
+            # self.bus.data = value
+            self.callback(self.bus.value.value)
+
+            await RisingEdge(self.clk)
+            await NextTimeStep()
 
 
 # class InputDriver(BusDriver):
@@ -58,20 +101,3 @@ async def test_dut(dut):
 #         await RisingEdge(self.clk)
 #         self.bus.din_en.value = 0
 #         await NextTimeStep()
-
-
-class DUTDriver:
-    def __init__(self, dut, clock):
-        self.dut = dut
-        self.clock = clock
-
-    async def send_data(self, value):
-        while not int(self.dut.din_rdy):
-            await RisingEdge(self.clock)
-            await ReadOnly()
-        self.dut.din_en.value = 1
-        self.dut.din_value.value = value
-        await ReadOnly()
-        await RisingEdge(self.clock)
-        self.dut.din_en.value = 0
-        await NextTimeStep()
