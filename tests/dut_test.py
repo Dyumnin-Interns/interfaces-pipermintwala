@@ -38,28 +38,6 @@ async def test_dut(dut):
     assert dut.dout_value.value == 10, "Incorrect accumulated value"
 
 
-class InputDriver(BusDriver):
-    _signals = [
-        "din_rdy",
-        "din_en",
-        "din_data",
-    ]
-
-    def __init__(self, dut, name, clk):
-        BusDriver.__init__(self, dut, name, clk)
-        self.bus.din_en = 0
-        self.clk = clk
-
-    async def _driver_send(self, value, sync: bool = True):
-        if self.bus.din_rdy.value != 1:
-            await RisingEdge(self.bus.din_rdy)
-        self.bus.din_en.value = 1
-        self.bus.din_data.value = value
-        await ReadOnly()
-        self.bus.din_en.value = 0
-        await NextTimeStep()
-
-
 class DUTDriver:
     def __init__(self, dut, clock):
         self.dut = dut
