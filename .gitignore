@@ -1,6 +1,6 @@
 *~
 #ignoring the vcd and the sim build files
-dut.vcd
+tests/dut.vcd
 tests/sim_build
 tests/__pycache__
-results.xml
+tests/results.xml
