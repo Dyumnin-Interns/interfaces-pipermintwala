@@ -32,31 +32,13 @@ async def test_dut(dut):
     # Testing from the len port
     dut.len_en.value = 1
     dut.len_value.value = 4  # Accumulate 4 bytes
-    inDrv = DUTDriver(dut, dut.CLK)
-    OutputDriver(dut, "dout", dut.CLK, sb_fn)
-    # inDrv2 = InputDriver(dut, "data_in", dut.CLK)
+    # inDrv = DUTDriver(dut, dut.CLK)
 
-    await Timer(10, "ns")
+    inDrv2 = InputDriver(dut, "din", dut.CLK)
+    OutputDriver(dut, "dout", dut.CLK, sb_fn)
 
     for i in range(4):
-        await inDrv.send_data(i + 1)
-
-
-class DUTDriver:
-    def __init__(self, dut, clock):
-        self.dut = dut
-        self.clock = clock
-
-    async def send_data(self, value):
-        while not int(self.dut.din_rdy):
-            await RisingEdge(self.clock)
-            await ReadOnly()
-        self.dut.din_en.value = 1
-        self.dut.din_value.value = value
-        await ReadOnly()
-        await RisingEdge(self.clock)
-        self.dut.din_en.value = 0
-        await NextTimeStep()
+        await inDrv2._driver_send(i + 1)
 
 
 class OutputDriver(BusDriver):
@@ -70,7 +52,6 @@ class OutputDriver(BusDriver):
         self.append(0)
 
     async def _driver_send(self, value, sync=True):
-        await Timer(20, "ns")
         while True:
             if self.bus.rdy.value != 1:
                 await RisingEdge(self.bus.rdy)
@@ -83,21 +64,21 @@ class OutputDriver(BusDriver):
             await NextTimeStep()
 
 
-# class InputDriver(BusDriver):
-#     _signals = ["din_rdy", "din_en", "din_value"]
+class InputDriver(BusDriver):
+    _signals = ["rdy", "en", "value"]
 
-#     def __init__(self, dut, name, clk):
-#         BusDriver.__init__(self, dut, name, clk)
-#         self.bus.din_en = 0
-#         self.clk = clk
+    def __init__(self, dut, name, clk):
+        BusDriver.__init__(self, dut, name, clk)
+        self.bus.en.value = 0
+        self.clk = clk
 
-#     async def _driver_send(self, value, sync=True):
-#         await RisingEdge(self.clk)
-#         if self.bus.din_rdy != 1:
-#             await RisingEdge(self.bus.din_rdy)
-#         self.bus.din_en.value = 1
-#         self.bus.din_value = value
-#         await ReadOnly()
-#         await RisingEdge(self.clk)
-#         self.bus.din_en.value = 0
-#         await NextTimeStep()
+    async def _driver_send(self, value, sync=True):
+        await RisingEdge(self.clk)
+        if self.bus.rdy != 1:
+            await RisingEdge(self.bus.rdy)
+        self.bus.en.value = 1
+        self.bus.value.value = value
+        await ReadOnly()
+        await RisingEdge(self.clk)
+        self.bus.en.value = 0
+        await NextTimeStep()
