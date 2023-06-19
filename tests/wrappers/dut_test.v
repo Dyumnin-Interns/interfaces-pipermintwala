@@ -74,7 +74,7 @@ module dut_test(CLK,
 
 	initial begin
 		$dumpfile("dut.vcd");
-		$dumpvars;
+		$dumpvars(0, dut_test);
 		CLK=0;
 		forever begin
 			#5 CLK=~CLK;

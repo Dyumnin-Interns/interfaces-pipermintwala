@@ -1,4 +1,3 @@
-from typing import Any, Optional
 import cocotb
 from cocotb.triggers import RisingEdge, Timer, NextTimeStep, ReadOnly
 from cocotb_bus.drivers import BusDriver
@@ -36,6 +35,7 @@ async def test_dut(dut):
     await lenDrv._driver_send(4)
     for i in range(4):
         await inDrv._driver_send(i + 1)
+    await Timer(40, "ns")
 
 
 class OutputDriver(BusDriver):

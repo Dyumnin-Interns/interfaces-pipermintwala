@@ -4,3 +4,4 @@ tests/dut.vcd
 tests/sim_build
 tests/__pycache__
 tests/results.xml
+cfgExpn.md
