@@ -2,10 +2,24 @@ import cocotb
 from cocotb.triggers import RisingEdge, Timer, NextTimeStep, ReadOnly
 from cocotb_bus.drivers import BusDriver
 from cocotb.result import TestError
+from cocotb_coverage.coverage import CoverCross, CoverPoint, coverage_db
+import random
+
+# specifying the expected value
 
 
 def sb_fn(actual_value):
-    assert actual_value == 10, "Scoreboard Matching Failed"
+    global expected_value
+    print(f"\n{expected_value}1\n")
+    print(f"\n{actual_value}\n")
+    assert actual_value == expected_value, "Scoreboard Matching Failed"
+
+
+# @CoverPoint("top.din", xf=lambda x, y: x, bins=[0, 255])  # noqa F405
+# @CoverPoint("top.len", xf=lambda x, y: y, bins=[0, 255])  # noqa F405
+# @CoverCross("top.cross.xy", items=["top.din", "top.len"])
+# def ab_cover(din):
+#     pass
 
 
 @cocotb.test()
@@ -32,10 +46,17 @@ async def test_dut(dut):
     lenDrv = InputDriver(dut, "len", dut.CLK)
     inDrv = InputDriver(dut, "din", dut.CLK)
     OutputDriver(dut, "dout", dut.CLK, sb_fn)
-    await lenDrv._driver_send(4)
-    for i in range(4):
+
+    lenValue = random.randint(0, 10)
+
+    await lenDrv._driver_send(lenValue)
+
+    global expected_value
+    expected_value = 0
+    for i in range(lenValue):
+        expected_value = expected_value + i
         await inDrv._driver_send(i + 1)
-    await Timer(40, "ns")
+    await Timer(100, "ns")
 
 
 class OutputDriver(BusDriver):
@@ -50,6 +71,8 @@ class OutputDriver(BusDriver):
 
     async def _driver_send(self, value, sync=True):
         while True:
+            for i in range(random.randint(0, 20)):
+                await RisingEdge(self.clk)
             if self.bus.rdy.value != 1:
                 await RisingEdge(self.bus.rdy)
             self.bus.en.value = 1
