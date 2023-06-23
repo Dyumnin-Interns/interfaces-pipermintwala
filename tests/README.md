@@ -1,7 +1,5 @@
 # Testplan
 
-Thank you for providing the Verilog code. Based on the code, I have created a test plan that aims to achieve 100% coverage of the IP functionality. The test plan covers different scenarios and edge cases to ensure the IP operates correctly under various conditions. Here's the test plan:
-
 1. Test Case 1: Initialization and Data Input
 
    - Reset the IP (assert RST_N low).
