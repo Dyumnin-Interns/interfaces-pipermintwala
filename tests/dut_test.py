@@ -10,8 +10,6 @@ import random
 
 def sb_fn(actual_value):
     global expected_value
-    print(f"\n{expected_value}1\n")
-    print(f"\n{actual_value}\n")
     assert actual_value == expected_value, "Scoreboard Matching Failed"
 
 
@@ -47,16 +45,16 @@ async def test_dut(dut):
     inDrv = InputDriver(dut, "din", dut.CLK)
     OutputDriver(dut, "dout", dut.CLK, sb_fn)
 
-    lenValue = random.randint(0, 10)
+    lenValue = 23
 
     await lenDrv._driver_send(lenValue)
 
     global expected_value
-    expected_value = 0
+    expected_value = (lenValue * (lenValue + 1)) / 2
+    print(expected_value)
     for i in range(lenValue):
-        expected_value = expected_value + i
         await inDrv._driver_send(i + 1)
-    await Timer(100, "ns")
+        await ReadOnly()
 
 
 class OutputDriver(BusDriver):
@@ -71,14 +69,13 @@ class OutputDriver(BusDriver):
 
     async def _driver_send(self, value, sync=True):
         while True:
-            for i in range(random.randint(0, 20)):
-                await RisingEdge(self.clk)
+            await ReadOnly()
             if self.bus.rdy.value != 1:
                 await RisingEdge(self.bus.rdy)
             self.bus.en.value = 1
             await ReadOnly()
             # self.bus.data = value
-            self.callback(self.bus.value.value)
+            self.callback(self.bus.value.value.integer)
 
             await RisingEdge(self.clk)
             await NextTimeStep()
