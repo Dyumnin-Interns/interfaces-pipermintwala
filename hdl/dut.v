@@ -207,7 +207,7 @@ module dut(
   assign dout_ff$D_IN = sum + din_value ;
   assign dout_ff$ENQ =
 	     din_en && current_count_PLUS_1_EQ_programmed_length___d8 ;
-  assign dout_ff$DEQ = dout_en ;
+  assign dout_ff$DEQ = dout_en & dout_rdy ;
   assign dout_ff$CLR = 1'b0 ;
 
   // remaining internal signals
