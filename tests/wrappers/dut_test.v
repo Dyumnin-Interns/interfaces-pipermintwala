@@ -66,7 +66,7 @@ module dut_test(CLK,
 		.cfg_data_in(cfg_data_in),
 		.cfg_op(cfg_op),
 		.cfg_en(cfg_en),
-		.cfg_data_out(cfg_en),
+		.cfg_data_out(cfg_data_out),
 		.cfg_rdy(cfg_rdy)
 	);
 

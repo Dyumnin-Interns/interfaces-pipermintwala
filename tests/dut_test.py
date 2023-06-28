@@ -1,20 +1,18 @@
 import cocotb
 from cocotb.result import TestFailure
 from cocotb_coverage.coverage import CoverCross, CoverPoint, coverage_db
-from cocotb.triggers import RisingEdge, Timer
+from cocotb.triggers import Timer
 import os
-from dut_init import dut_init
-from dut_drivers import InputDriver, OutputDriver
+from dut_init import dut_init, dut_rst
+from dut_drivers import InputDriver, OutputDriver, ConfigDriver
 from dut_monitor import IO_Monitor
+import random
 
 
 def sb_fn(actual_value):
     global expected_value
     print(f"\n\n{expected_value,actual_value}\n\n")
-    try:
-        assert actual_value == expected_value.pop(0)
-    except:
-        raise TestFailure("Scoreboard Matching failed")
+    assert actual_value == expected_value.pop(0), "Scoreboard Matching failed"
 
 
 @CoverPoint("top.din", bins=range(256))  # noqa F405
@@ -43,38 +41,42 @@ def din_prot_cover(txn):
 
 @cocotb.test()
 async def test_dut(dut):
-    # Test using len port
-
     await dut_init(dut)
-    lenDrv = InputDriver(dut, "len", dut.CLK)
     inDrv = InputDriver(dut, "din", dut.CLK)
     OutputDriver(dut, "dout", dut.CLK, sb_fn)
     IO_Monitor(dut, "din", dut.CLK, callback=din_prot_cover)
     global expected_value
     expected_value = []
-    v = [1, 4, 6, 33, 150, 20, 20, 3, 5, 8]
-    expected_value.append(sum(v))
-    await lenDrv._driver_send(len(v))
-    for i in v:
-        await inDrv._driver_send(i)
-        din_cover(i)
+
+    # Test using len port
+    v = [[1, 4, 2, 33, 10, 20, 20, 31, 20, 8], [1, 2, 3], [2, 5, 6, 7]]
+    lenDrv = InputDriver(dut, "len", dut.CLK)
+    for j in v:
+        await dut_rst(dut)
+
+        expected_value.append(sum(j))
+        await lenDrv._driver_send(len(j))
+        for i in j:
+            await inDrv._driver_send(i)
+            din_cover(i)
+    await Timer(10, "ns")
 
     # Test using cfg port
-
-    await dut_init(dut)
+    await dut_rst(dut)
+    v = [1, 4, 6, 33, 12, 20, 20, 3, 5, 8, 2, 2]
+    config = {"sw_overwrite": True, "lenValue": len(v), "pause": False}
     await Timer(10, "ns")
-    dut.cfg_en.value = 1
-    dut.cfg_op.value = 1  # Write operation
-    dut.cfg_address.value = 4
-    dut.cfg_data_in.value = 0x00000001  # Enable s/w override
-    dut.cfg_address.value = 8
-    v = [1, 4, 2, 33, 90, 20, 20, 31, 20, 8]
+    cfgDrv = ConfigDriver(dut, "cfg", dut.CLK)
+    await cfgDrv._driver_send(config)
     expected_value.append(sum(v))
-    dut.cfg_data_in.value = len(v)  # Set Len Value
-
     for i in v:
         await inDrv._driver_send(i)
         din_cover(i)
+        if i == 2:
+            await cfgDrv._driver_send({"sw_overwrite": True, "pause": True})
+
+    await Timer(40, "ns")
+
     coverage_db.report_coverage(cocotb.log.info, bins=True)
     coverage_file = os.path.join(os.getenv("RESULT_PATH", "./"), "coverage.xml")
     coverage_db.export_to_xml(filename=coverage_file)

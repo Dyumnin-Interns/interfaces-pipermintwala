@@ -164,7 +164,7 @@ module dut(
 						 .CLR(dout_ff$CLR),
 						 .D_OUT(dout_ff$D_OUT),
 						 .FULL_N(dout_ff$FULL_N),
-						 .EMPTY_N(dout_ff$EMPTY_N));
+						 .EMPTY_N(dout_ff$EMPTY_N));  
 
   // inputs to muxes for submodule ports
   assign MUX_programmed_length$write_1__SEL_1 =
@@ -192,8 +192,8 @@ module dut(
 	       len_value :
 	       cfg_data_in[7:0] ;
   assign programmed_length$EN =
-	     len_en && !sw_override && !busy ||
-	     cfg_en && cfg_op && cfg_address == 8'd8 && sw_override ;
+	     (len_en && !sw_override ||
+	     cfg_en && cfg_op && cfg_address == 8'd8 && sw_override )&& !busy;
 
   // register sum
   assign sum$D_IN = sum + din_value ;
