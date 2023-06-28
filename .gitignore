@@ -4,4 +4,5 @@ tests/dut.vcd
 tests/sim_build
 tests/__pycache__
 tests/results.xml
+tests/coverage.xml
 cfgExpn.md
