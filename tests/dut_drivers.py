@@ -87,30 +87,3 @@ class ConfigDriver(BusDriver):
             await self._write_reg(4, pause)
         lenValue = config.get("lenValue", 0)
         await self._write_reg(8, lenValue)
-
-    #     self.bus.value.value =
-    #     await ReadOnly()
-    #     await RisingEdge(self.clk)
-    #     self.bus.en.value = 0
-    #     await NextTimeStep()
-
-    # async def _driver(self):
-    #     await RisingEdge(self.clk)
-    #     self.bus.en.value = 1
-    #     self.bus.address.value = 4
-    #     self.bus.data_in.value = 0x00000001  # Enable s/w override
-    #     await RisingEdge(self.clk)
-    #     self.bus.op.value = 0
-    #     for i in range(2):
-    #         await RisingEdge(self.clk)
-
-    #     self.bus.en.value = 1
-    #     self.bus.address.value = 8
-    #     self.bus.op.value = 1  # Write operation
-    #     self.bus.data_in.value = 12
-    #     await ReadOnly()
-    #     await RisingEdge(self.clk)
-    #     self.bus.op.value = 0
-    #     await ReadOnly()
-    #     await RisingEdge(self.clk)
-    #     await NextTimeStep()
