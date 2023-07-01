@@ -223,9 +223,9 @@ module dut(
 	      { 15'd0, x__h969 };
       8'd4:
 	  CASE_cfg_address_0_0_CONCAT_x69_4_0_CONCAT_sw__ETC__q1 =
-	      { 31'd0, sw_override };
+	      { 30'd0, pause , sw_override };
       default: CASE_cfg_address_0_0_CONCAT_x69_4_0_CONCAT_sw__ETC__q1 =
-		   { 24'd0, programmed_length };
+		   { 24'd0, cfg_data_in[7:0] };
     endcase
   end
 
