@@ -1,1 +1,9 @@
 *~
+#ignoring the vcd and the sim build files
+tests/dut.vcd
+tests/sim_build
+tests/__pycache__
+tests/results.xml
+tests/coverage.xml
+tests/README.md
+cfgExpn.md

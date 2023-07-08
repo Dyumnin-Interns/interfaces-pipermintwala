@@ -42,7 +42,8 @@
   `define BSV_RESET_EDGE negedge
 `endif
 
-module dut(CLK,
+module dut(
+     CLK,
 	   RST_N,
 
 	   din_value,
@@ -163,7 +164,7 @@ module dut(CLK,
 						 .CLR(dout_ff$CLR),
 						 .D_OUT(dout_ff$D_OUT),
 						 .FULL_N(dout_ff$FULL_N),
-						 .EMPTY_N(dout_ff$EMPTY_N));
+						 .EMPTY_N(dout_ff$EMPTY_N));  
 
   // inputs to muxes for submodule ports
   assign MUX_programmed_length$write_1__SEL_1 =
@@ -191,8 +192,8 @@ module dut(CLK,
 	       len_value :
 	       cfg_data_in[7:0] ;
   assign programmed_length$EN =
-	     len_en && !sw_override && !busy ||
-	     cfg_en && cfg_op && cfg_address == 8'd8 && sw_override ;
+	     (len_en && !sw_override ||
+	     cfg_en && cfg_op && cfg_address == 8'd8 && sw_override )&& !busy;
 
   // register sum
   assign sum$D_IN = sum + din_value ;
@@ -206,7 +207,7 @@ module dut(CLK,
   assign dout_ff$D_IN = sum + din_value ;
   assign dout_ff$ENQ =
 	     din_en && current_count_PLUS_1_EQ_programmed_length___d8 ;
-  assign dout_ff$DEQ = dout_en ;
+  assign dout_ff$DEQ = dout_en & dout_rdy ;
   assign dout_ff$CLR = 1'b0 ;
 
   // remaining internal signals
@@ -222,9 +223,9 @@ module dut(CLK,
 	      { 15'd0, x__h969 };
       8'd4:
 	  CASE_cfg_address_0_0_CONCAT_x69_4_0_CONCAT_sw__ETC__q1 =
-	      { 31'd0, sw_override };
+	      { 30'd0, pause , sw_override };
       default: CASE_cfg_address_0_0_CONCAT_x69_4_0_CONCAT_sw__ETC__q1 =
-		   { 24'd0, programmed_length };
+		   { 24'd0, cfg_data_in[7:0] };
     endcase
   end
 
